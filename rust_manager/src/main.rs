@@ -80,6 +80,8 @@ fn run_report(marc_full_source_files_dir: &str, marc_full_output_files_dir: &str
     let compressed_marc_files: Vec<std::path::PathBuf> = helpers::sort_files(unsorted_compressed_marc_files);
 
     //- loop through list ---------------------------------
+    let mut bookplate_complete_data_vector: Vec<BTreeMap<String, String>> = Vec::new();
+
     for (i, file) in compressed_marc_files.iter().enumerate() {
         log_debug!("processing file: {:?}", file);
 
@@ -93,6 +95,9 @@ fn run_report(marc_full_source_files_dir: &str, marc_full_output_files_dir: &str
         let marc_records: marc_xml_reader::Collection = marc_xml_reader::load_records(output_path_str);
         log_debug!("marc_records.records length, ``{}``", marc_records.records.len());
 
+        // Initialize a vector to hold the bookplate_data BTreeMaps
+        let mut bookplate_data_vector: Vec<BTreeMap<String, String>> = Vec::new();
+
         //- process records -------------------------------
         for record in marc_records.records.iter() {
             //- get bookplate hash ------------------------
@@ -100,7 +105,18 @@ fn run_report(marc_full_source_files_dir: &str, marc_full_output_files_dir: &str
             log_debug!("bookplate_data, ``{:#?}``", bookplate_data); // pretty-prints output
                                                                      //- check bruknow -----------------------------
                                                                      // let bookplate_data: BTreeMap<String, String> = helpers::check_bruknow(&record);
+            // Add the bookplate_data to the vector only if it's populated
+            if !bookplate_data.is_empty() {
+                bookplate_data_vector.push(bookplate_data);
+            }
         }
+        // print the bookplate_data_vector
+        log_debug!("bookplate_data_vector, ``{:#?}``", bookplate_data_vector);
+
+        //- add eache element of the vector to the complete vector ------------------------
+        bookplate_complete_data_vector.append(&mut bookplate_data_vector);
+        log_debug!("bookplate_complete_data_vector, ``{:#?}``", bookplate_complete_data_vector);
+
 
         //- delete file -----------------------------------
 
